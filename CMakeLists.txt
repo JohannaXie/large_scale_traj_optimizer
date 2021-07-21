@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(fast_minSnap)
+project(fast_minsnap)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 set(CMAKE_BUILD_TYPE "Release")
@@ -25,8 +25,14 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-add_executable(${PROJECT_NAME}_node src/example1_node.cpp)
+add_executable(example1_node src/example1_node.cpp)
 
-target_link_libraries(${PROJECT_NAME}_node
+target_link_libraries(example1_node
+  ${catkin_LIBRARIES}
+)
+
+add_executable(traj_node src/TrajGen_fast.cpp)
+
+target_link_libraries(traj_node
   ${catkin_LIBRARIES}
 )
