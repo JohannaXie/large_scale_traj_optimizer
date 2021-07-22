@@ -600,6 +600,7 @@ namespace min_jerk
             {
                 tempNorm = pieces[i].getMaxVelRate();
                 maxVelRate = maxVelRate < tempNorm ? tempNorm : maxVelRate;
+                // printf("max vel for piece %d, %.2f\n", i, tempNorm);
             }
             return maxVelRate;
         }
@@ -619,13 +620,22 @@ namespace min_jerk
         }
 
         // Check whether the velocity rate of this trajectory exceeds the threshold
-        inline bool checkMaxVelRate(double maxVelRate)
+        inline bool checkMaxVelRate(double maxVelRate, Eigen::VectorXd &VelUNFeasible)
         {
-            int N = getPieceNum();
+            int N = getPieceNum();      // N-1 pieces
             bool feasible = true;
-            for (int i = 0; i < N && feasible; i++)
+            for (int i = 0; i < N; i++)
             {
-                feasible = feasible && pieces[i].checkMaxVelRate(maxVelRate);
+                if (pieces[i].checkMaxVelRate(maxVelRate))
+                {
+                    VelUNFeasible(i) = 0;
+                }
+                else 
+                {
+                    VelUNFeasible(i) = 1;
+                    feasible = false;
+                    // printf("unfeasible piece %d\n", i);
+                }
             }
             return feasible;
         }

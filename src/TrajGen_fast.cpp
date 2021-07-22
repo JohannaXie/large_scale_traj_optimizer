@@ -172,8 +172,9 @@ int main(int argc, char **argv)
     // waypGen.read(waypoints);
 
     // allocate time for waypoints
-    VectorXd ts(waypGen.N);
-    double MaxVel = 15.0, MaxVelCal = 15.0;
+    VectorXd ts(waypGen.N-1);
+    VectorXd VelUNFeasible(waypGen.N-1);
+    double MaxVel = 15.0, MaxVelCal = 14.0;
     ts = allocateTime(waypoints, MaxVelCal, 5.0);
 
     // intial & finial state
@@ -191,21 +192,27 @@ int main(int argc, char **argv)
     jerkOpt.getTraj(minJerkTraj);
 
     // check maximum velocity
-    while (!minJerkTraj.checkMaxVelRate(MaxVel))
+    while (!minJerkTraj.checkMaxVelRate(MaxVel, VelUNFeasible))
     {
-        printf("maximum velocity")
+        printf("maximum velocity %.2f\n", minJerkTraj.getMaxVelRate());
+        // cout << ts << endl<<endl;
         MaxVelCal = MaxVelCal - 0.5;
         ts = allocateTime(waypoints, MaxVelCal, 5.0);
+        // for (int i = 0; i < (waypGen.N-1); i++)
+        // {
+        //     if (VelUNFeasible(i) == 1)
+        //         ts(i) = ts(i) + 1.0;
+        // }
         jerkOpt.generate(waypoints.block(0, 1, 3, waypGen.N - 2), ts);
         jerkOpt.getTraj(minJerkTraj);
     }
+    printf("maximum velocity %.2f\n", minJerkTraj.getMaxVelRate());
+    // cout << ts << endl;
 
     // write trajectory
     TrajectoryWriter trajout;
     int frq = 100;
-    double endtime = 0.0;
-    for (int i = 0; i < waypGen.N - 1;i++)
-        endtime += ts(i);
+    double endtime = minJerkTraj.getTotalDuration();
     int steps = floor(frq * endtime);
     for (int i = 0; i < steps; i++)
     {
